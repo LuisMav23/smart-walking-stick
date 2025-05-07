@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            /* Reset margins for the body */
+            body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background-color: #f4f4f4;
+            }
+            /* Ensure the video image resizes well on mobile */
+            #video {
+                max-width: 100%;
+                height: auto;
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <img id="video" alt="Live video feed" />
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            const socket = io();
+            const img = document.getElementById('video');
+
+            socket.on('frame', data => {
+                // Convert incoming ArrayBuffer data to a Blob.
+                const blob = new Blob([data], { type: 'image/jpeg' });
+                const preloader = new Image();
+                preloader.onload = () => {
+                    // Set the src once the frame is loaded to prevent flickering.
+                    img.src = preloader.src;
+                    // Clean up the blob URL.
+                    URL.revokeObjectURL(preloader.src);
+                };
+                // Create a blob URL for the image preloader.
+                preloader.src = URL.createObjectURL(blob);
+            });
+        </script>
+    </body>
+</html>
